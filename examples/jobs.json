@@ -1,0 +1,20 @@
+[
+  {
+    "company": "Demo Analytics (fictional classroom example)",
+    "role": "Data Analyst Intern",
+    "source": "Synthetic evaluation fixture, not a live vacancy",
+    "job_description": "Responsibilities\nAnalyze sales data with Python, SQL and Pandas. Build Power BI dashboards to communicate monthly revenue trends. Work with business teams to clean datasets and prepare reports.\nRequirements\nPython, SQL, Power BI and Pandas are required. Graduate students and entry level candidates can apply.\nEducation\nBachelor degree in Computer Science or Statistics.\nPreferred\nExcel and Git are preferred."
+  },
+  {
+    "company": "Demo Analytics (fictional classroom example)",
+    "role": "Junior Data Engineer",
+    "source": "Synthetic evaluation fixture, not a live vacancy",
+    "job_description": "Responsibilities\nCreate ETL pipelines using Python, SQL and Spark. Schedule data workflows using Airflow. Help the analytics team move large datasets into PostgreSQL and investigate pipeline failures.\nRequirements\nPython, SQL, Spark, ETL and Airflow are required. Entry level applicants with academic projects are welcome.\nEducation\nBachelor degree in Computer Science.\nPreferred\nAWS and Docker are preferred."
+  },
+  {
+    "company": "Demo Systems (fictional classroom example)",
+    "role": "Senior Java Backend Engineer",
+    "source": "Synthetic evaluation fixture, not a live vacancy",
+    "job_description": "Responsibilities\nDesign backend services with Java and Spring. Maintain REST APIs for distributed enterprise applications. Deploy production services with Docker and Kubernetes. Mentor engineers and diagnose performance problems across service boundaries.\nRequirements\nJava, Spring, REST API, Docker and Kubernetes are required. Minimum 5 years of professional experience building backend systems.\nEducation\nMaster degree in Computer Science.\nPreferred\nAWS and MongoDB are preferred."
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {"text": "Built dashboards with SQL, Python and PowerBI.", "skills": ["SQL", "Python", "Power BI"]},
+  {"text": "ReactJS + JS frontend; NodeJS with Postgres on the backend.", "skills": ["React", "JavaScript", "Node.js", "PostgreSQL"]},
+  {"text": "C++, C# and .NET; version control with Git.", "skills": ["C++", "C#", ".NET", "Git"]},
+  {"text": "ML project used Sklearn, Pandas, NumPy and NLP.", "skills": ["Machine Learning", "Scikit-learn", "Pandas", "NumPy", "Natural Language Processing"]},
+  {"text": "Communication, leadership and office coordination.", "skills": []},
+  {"text": "JavaScript is different from Java. MYSQL and REST APIs.", "skills": ["JavaScript", "Java", "MySQL", "REST API"]},
+  {"text": "Go and R are listed as programming languages. We go to work tomorrow.", "skills": ["Go", "R"]},
+  {"text": "Worked on Django and FastAPI services deployed with K8s and Amazon Web Services.", "skills": ["Django", "FastAPI", "Kubernetes", "AWS"]}
+]

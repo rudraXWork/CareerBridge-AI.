@@ -1,0 +1,9 @@
+{
+  "JS": "JavaScript", "Postgres": "PostgreSQL", "ML": "Machine Learning",
+  "NLP": "Natural Language Processing", "PowerBI": "Power BI",
+  "NodeJS": "Node.js", "Node JS": "Node.js", "ReactJS": "React",
+  "React.js": "React", "Sklearn": "Scikit-learn", "Scikit learn": "Scikit-learn",
+  "MS Excel": "Excel", "Microsoft Excel": "Excel", "GCP": "Google Cloud",
+  "Amazon Web Services": "AWS", "K8s": "Kubernetes", "Spring Boot": "Spring",
+  "REST APIs": "REST API", "Golang": "Go"
+}

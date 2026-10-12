@@ -1,0 +1,18 @@
+Asha Rao
+asha@example.com
+
+SUMMARY
+Computer science student building practical analytics projects with Python and SQL.
+
+EDUCATION
+Bachelor of Technology in Computer Science, 2023–2027
+
+TECHNICAL SKILLS
+Python, SQL, PowerBI, Pandas, NumPy, Excel, Git
+
+PROJECTS
+Sales dashboard: cleaned sales data using Python and Pandas, queried PostgreSQL with SQL, and built Power BI visualizations to compare monthly sales.
+Customer analytics: used Python and SQL to analyze customer activity and create a Power BI dashboard for business reporting.
+
+CERTIFICATIONS
+Introduction to Data Analysis

@@ -1,0 +1,156 @@
+{
+  "note": "Small synthetic classroom examples that informed development. Not a blind benchmark or hiring prediction.",
+  "skill_extraction": {
+    "examples": 8,
+    "tp": 26,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+  },
+  "matches": [
+    {
+      "expected": "High match",
+      "role": "Data Analyst Intern",
+      "result": {
+        "score": 87.02,
+        "components": {
+          "skills": 100.0,
+          "semantic": 77.49,
+          "projects": 63.22,
+          "experience": 100.0,
+          "education": 100.0
+        },
+        "weights_used": {
+          "skills": 0.4,
+          "semantic": 0.25,
+          "projects": 0.2,
+          "experience": 0.1,
+          "education": 0.05
+        },
+        "evidence_coverage": 100.0,
+        "strong_matches": [
+          "Excel",
+          "Git",
+          "Pandas",
+          "Power BI",
+          "Python",
+          "SQL"
+        ],
+        "missing_skills": [],
+        "gaps": [],
+        "relevant_projects": [
+          {
+            "text": "Sales dashboard: cleaned sales data using Python and Pandas, queried PostgreSQL with SQL, and built Power BI visualizations to compare monthly sales.",
+            "score": 63.22
+          },
+          {
+            "text": "Customer analytics: used Python and SQL to analyze customer activity and create a Power BI dashboard for business reporting.",
+            "score": 59.86
+          }
+        ],
+        "explanation": "Matched 4 of 4 required skills. Strengths: Pandas, Power BI, Python, SQL.",
+        "warnings": []
+      }
+    },
+    {
+      "expected": "Medium match",
+      "role": "Junior Data Engineer",
+      "result": {
+        "score": 53.01,
+        "components": {
+          "skills": 42.5,
+          "semantic": 54.6,
+          "projects": 36.79,
+          "experience": 100.0,
+          "education": 100.0
+        },
+        "weights_used": {
+          "skills": 0.4,
+          "semantic": 0.25,
+          "projects": 0.2,
+          "experience": 0.1,
+          "education": 0.05
+        },
+        "evidence_coverage": 100.0,
+        "strong_matches": [
+          "PostgreSQL",
+          "Python",
+          "SQL"
+        ],
+        "missing_skills": [
+          "Airflow",
+          "ETL",
+          "Spark"
+        ],
+        "gaps": [
+          "Preferred: AWS",
+          "Preferred: Docker"
+        ],
+        "relevant_projects": [
+          {
+            "text": "Customer analytics: used Python and SQL to analyze customer activity and create a Power BI dashboard for business reporting.",
+            "score": 36.79
+          },
+          {
+            "text": "Sales dashboard: cleaned sales data using Python and Pandas, queried PostgreSQL with SQL, and built Power BI visualizations to compare monthly sales.",
+            "score": 36.69
+          }
+        ],
+        "explanation": "Matched 3 of 6 required skills. Strengths: PostgreSQL, Python, SQL. Gaps: Airflow, ETL, Spark, Preferred: AWS, Preferred: Docker.",
+        "warnings": []
+      }
+    },
+    {
+      "expected": "Low match",
+      "role": "Senior Java Backend Engineer",
+      "result": {
+        "score": 10.39,
+        "components": {
+          "skills": 0.0,
+          "semantic": 24.68,
+          "projects": 8.61,
+          "experience": 0.0,
+          "education": 50.0
+        },
+        "weights_used": {
+          "skills": 0.4,
+          "semantic": 0.25,
+          "projects": 0.2,
+          "experience": 0.1,
+          "education": 0.05
+        },
+        "evidence_coverage": 100.0,
+        "strong_matches": [],
+        "missing_skills": [
+          "Docker",
+          "Java",
+          "Kubernetes",
+          "REST API",
+          "Spring"
+        ],
+        "gaps": [
+          "Preferred: AWS",
+          "Preferred: MongoDB",
+          "5 years required; years not stated",
+          "Education requirement is not fully supported by the profile."
+        ],
+        "relevant_projects": [
+          {
+            "text": "Customer analytics: used Python and SQL to analyze customer activity and create a Power BI dashboard for business reporting.",
+            "score": 8.61
+          },
+          {
+            "text": "Sales dashboard: cleaned sales data using Python and Pandas, queried PostgreSQL with SQL, and built Power BI visualizations to compare monthly sales.",
+            "score": 8.32
+          }
+        ],
+        "explanation": "Matched 0 of 5 required skills. Gaps: Docker, Java, Kubernetes, REST API, Spring, Preferred: AWS, Preferred: MongoDB, 5 years required; years not stated, Education requirement is not fully supported by the profile..",
+        "warnings": []
+      }
+    }
+  ],
+  "expected_order_observed": true,
+  "live_providers_verified": false
+}
