@@ -42,5 +42,8 @@ def search_jobs(data: JobSearchRequest):
         opportunities.append({'id': save('job', job.model_dump()), 'job': job, 'match': match})
     opportunities.sort(key=lambda item: item['match'].score if item['match'].score is not None else -1,
                        reverse=True)
+    opportunities = opportunities[:data.limit]
+    if len(opportunities) < data.limit:
+        warnings.insert(0, f'Found {len(opportunities)} readable listings; aiming for {data.limit}. Broaden optional filters or try again later.')
     return {'opportunities': opportunities, 'warnings': warnings,
             'note': 'Scores are local heuristics, not hiring probabilities. Confirm listings are still open.'}

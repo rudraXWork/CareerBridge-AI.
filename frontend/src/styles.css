@@ -197,6 +197,9 @@ input:hover:not(:disabled), textarea:hover:not(:disabled), select:hover:not(:dis
 .job-source .field { margin-top: 0.75rem; }
 .job-upload { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin: -0.25rem 0 1.25rem; }
 .job-upload span { color: var(--muted); font-size: 0.8125rem; overflow-wrap: anywhere; min-width: 0; }
+.job-filters { margin-bottom: 1.25rem; }
+.job-filters .form-grid { margin-top: 1rem; }
+.opportunity-score .text-button { margin-top: 0.75rem; }
 .job-match-result { border-top: 1px solid var(--line); scroll-margin-top: 1rem; }
 .recipient-fields { border-top: 1px solid var(--line); padding-top: 1.375rem; margin-top: 3px; }
 .recipient-fields h4 { margin-bottom: 1.125rem; }

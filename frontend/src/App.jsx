@@ -15,9 +15,9 @@ const steps = [
   { name: 'Contacts', icon: Users },
   { name: 'Email draft', icon: EnvelopeSimple },
 ]
-const titles = ['Let your experience do the talking.', 'See how your resume fits.', 'Reach the right person.', 'Make your first line count.']
+const titles = ['Let your experience do the talking.', 'Find openings that fit your resume.', 'Reach the right person.', 'Make your first line count.']
 const subtitles = ['Upload your resume and we’ll turn it into a clear profile to help you find the right opportunities and write personalized cold emails.',
-  'Compare a job description with your resume, review your match, then find the right people to contact.',
+  'We search recent postings using your skills and likely roles. Review the fit, apply, or find a contact.',
   'A relevant contact matters more than a long list of email addresses.',
   'A personal, grounded introduction. Ready for you to review and copy.']
 
@@ -29,7 +29,7 @@ export default function App() {
   const [filename, setFilename] = useState('')
   const [resumeVersion, setResumeVersion] = useState(0)
   const [sample, setSample] = useState(false)
-  const [mode, setMode] = useState('company')
+  const [mode, setMode] = useState('discover')
   const [target, setTarget] = useState({ role: '', company: '', location: '', job_type: '', job_url: '', job_description: '' })
   const [jobFilename, setJobFilename] = useState('')
   const [contactTarget, setContactTarget] = useState({ company: '', role: '' })
@@ -60,6 +60,7 @@ export default function App() {
   const targetForm = useRef(null)
   const matchPanel = useRef(null)
   const contactForm = useRef(null)
+  const jobSearchDone = useRef(false)
 
   useEffect(() => { request('/health').then(setHealth).catch(() => setHealth(false)) }, [])
 
@@ -70,16 +71,19 @@ export default function App() {
     }
   }, [match])
 
-  function go(next) {
-    const nextTarget = { company: job?.company || contactTarget.company || target.company,
-      role: job?.role || (contactTarget.company ? contactTarget.role : target.role) }
+  function go(next, chosenJob = job) {
+    const nextTarget = { company: chosenJob?.company || contactTarget.company || target.company,
+      role: chosenJob?.role || (contactTarget.company ? contactTarget.role : target.role) }
     if (next === 2) setContactTarget(nextTarget)
     setStep(next)
     setError('')
     setMessage('')
     window.scrollTo({ top: 0, behavior: 'instant' })
     requestAnimationFrame(() => heading.current?.focus())
-    if (next === 2 && step !== 2 && job && mode !== 'person' && !contacts.length && !selected) loadPeople(nextTarget, true)
+    if (next === 1 && candidate && !jobSearchDone.current) {
+      setMode('discover'); loadJobs(true)
+    }
+    if (next === 2 && step !== 2 && chosenJob && mode !== 'person' && ((!contacts.length && !selected) || chosenJob !== job)) loadPeople(nextTarget, true)
   }
 
   function resetResults() {
@@ -100,10 +104,11 @@ export default function App() {
       const result = await request('/resume/upload', null, file)
       setCandidate(result.profile); setResumeReport(result.health); setFilename(file.name); setSample(isSample)
       setResumeInsights(null)
+      jobSearchDone.current = false; setMode('discover')
       if (candidate) resetResults()
       else { setMatch(null); setEmail(null) }
       setResumeVersion(n => n + 1)
-      setTarget(prev => ({ ...prev, role: prev.role || result.profile.possible_roles[0] || '' }))
+      setTarget({ role: '', company: '', location: '', job_type: '', job_url: '', job_description: '' })
       setMessage('Your profile is ready to review. Correct any details before continuing.')
     })
   }
@@ -149,6 +154,7 @@ export default function App() {
 
   async function saveProfile(profile) {
     setCandidate(profile); setResumeReport(null); setResumeInsights(null); resetResults()
+    jobSearchDone.current = false
     await recheckResume(profile)
   }
 
@@ -171,7 +177,7 @@ export default function App() {
 
   function newApplication() {
     setCandidate(null); setResumeReport(null); setResumeInsights(null); setFilename(''); setSample(false); resetResults()
-    setPerson({ name: '', role: '', email: '' }); setMode('company')
+    setPerson({ name: '', role: '', email: '' }); setMode('discover'); jobSearchDone.current = false
     setTarget({ role: '', company: '', location: '', job_type: '', job_url: '', job_description: '' })
     setJobFilename('')
     setContactTarget({ company: '', role: '' }); setPurpose('Networking')
@@ -179,12 +185,27 @@ export default function App() {
     go(0)
   }
 
-  function changeMode(value) { setMode(value); resetResults(); setError('') }
+  function changeMode(value) {
+    setMode(value); resetResults(); setError('')
+    if (value === 'discover') loadJobs(true)
+  }
+
+  async function loadJobs(automatic = false) {
+    jobSearchDone.current = true
+    await run('Searching recent jobs for your resume', async () => {
+      const result = await request('/jobs/search', { candidate, limit: 5,
+        ...(automatic ? {} : { target_role: target.role, company: target.company,
+          location: target.location, job_type: target.job_type }) })
+      setOpportunities(result.opportunities); setWarnings(result.warnings)
+      setJob(null); setMatch(null)
+    })
+  }
 
   async function findJobs(e) {
     e.preventDefault()
-    if (target.role.trim().length < 2 || (mode !== 'discover' && target.company.trim().length < 2)) {
-      setError(mode === 'discover' ? 'Enter a target role before searching for opportunities.' : 'Enter a target role and company name before continuing.'); return
+    if (mode === 'discover') { await loadJobs(); return }
+    if (target.role.trim().length < 2 || target.company.trim().length < 2) {
+      setError('Enter a target role and company name before continuing.'); return
     }
     if (mode === 'company' && !target.job_description.trim()) {
       setError('Paste or upload the job description to get a job-specific match score. Use Find opportunities to search for a listing.'); return
@@ -194,14 +215,7 @@ export default function App() {
       setSelected({ ...person, company: target.company.trim(), email_status: 'Unknown', email_source: 'User supplied', warnings: [], email_checks: {}, inferred_emails: [] })
       setPurpose('Networking'); go(3); return
     }
-    await run(mode === 'discover' ? 'Finding readable job listings' : 'Comparing your profile', async () => {
-      if (mode === 'discover') {
-        const result = await request('/jobs/search', { candidate, target_role: target.role,
-          company: target.company, location: target.location, job_type: target.job_type })
-        setOpportunities(result.opportunities); setWarnings(result.warnings)
-        if (!result.opportunities.length) setMessage('No readable listings found. You can still open Contacts and connect with people at a company.')
-        return
-      }
+    await run('Comparing your profile', async () => {
       const result = await request('/match', { candidate, job: {
         company: target.company.trim(), role: target.role.trim(), job_url: target.job_url.trim(),
         job_description: target.job_description.trim(), location: target.location, source: sampleJobs.some(item => item.company === target.company && item.role === target.role && item.job_description === target.job_description) ? 'Classroom example (fictional)' : 'User supplied',
@@ -212,10 +226,11 @@ export default function App() {
     })
   }
 
-  function chooseJob(item) {
+  function chooseJob(item, openContacts = false) {
     setJob(item.job); setMatch(item.match); setContacts([]); setSelected(null); setEmail(null)
     setContactTarget({ company: item.job.company, role: item.job.role }); setPurpose('Job application')
     setMessage('Job selected. Your match breakdown is below.')
+    if (openContacts) go(2, item.job)
   }
 
   function useSampleJob() {
@@ -325,28 +340,29 @@ export default function App() {
 
             {step === 1 && <>
               <section className="paper target-paper">
-                <div className="mode-tabs" role="group" aria-label="Targeting mode">{[['company', 'I know the company'], ['discover', 'Find opportunities'], ['person', 'I know the person']].map(([value, label]) => <button key={value} disabled={!!busy} className={mode === value ? 'selected' : ''} onClick={() => changeMode(value)} aria-pressed={mode === value}>{label}</button>)}</div>
-                <div className="section-head"><h2>{mode === 'company' ? 'Compare with a job description' : mode === 'discover' ? 'Find an opportunity' : 'Connect with someone you know'}</h2></div>
-                <p className="section-description">{mode === 'company' ? 'Add the role, company and responsibilities. Your score shows how your reviewed experience fits this specific job.' : mode === 'discover' ? 'Search for listings, select an opportunity, then review its match score and find contacts.' : 'Enter the company and your contact. Add a job description if you also want a match score.'}</p>
+                <div className="mode-tabs" role="group" aria-label="Targeting mode">{[['discover', 'Jobs for you'], ['company', 'I know the company'], ['person', 'I know the person']].map(([value, label]) => <button key={value} disabled={!!busy} className={mode === value ? 'selected' : ''} onClick={() => changeMode(value)} aria-pressed={mode === value}>{label}</button>)}</div>
+                <div className="section-head"><h2>{mode === 'company' ? 'Compare with a job description' : mode === 'discover' ? 'Your resume is the starting point' : 'Connect with someone you know'}</h2></div>
+                <p className="section-description">{mode === 'company' ? 'Add the role, company and responsibilities. Your score shows how your reviewed experience fits this specific job.' : mode === 'discover' ? 'Looking for five openings from the past month. We use your skills and likely roles, with no preferred company required. Posting dates and availability still need checking on the source.' : 'Enter the company and your contact. Add a job description if you also want a match score.'}</p>
                 <form ref={targetForm} onSubmit={findJobs}><fieldset disabled={!!busy}>
-                  <div className="form-grid"><Field label="Target role" value={target.role} onChange={e => updateTarget('role', e.target.value)} required minLength={2} placeholder="e.g. Data Analyst" />
-                    <Field label={mode === 'discover' ? 'Preferred company (optional)' : 'Company'} value={target.company} onChange={e => updateTarget('company', e.target.value)} required={mode !== 'discover'} minLength={2} placeholder="Company name" /></div>
-                  {mode === 'discover' ? <div className="form-grid"><Field label="Location (optional)" value={target.location} onChange={e => updateTarget('location', e.target.value)} placeholder="City or remote" /><Field label="Job type (optional)" value={target.job_type} onChange={e => updateTarget('job_type', e.target.value)} placeholder="Internship, graduate, full-time…" /></div>
+                  {mode !== 'discover' && <div className="form-grid"><Field label="Target role" value={target.role} onChange={e => updateTarget('role', e.target.value)} required minLength={2} placeholder="e.g. Data Analyst" />
+                    <Field label="Company" value={target.company} onChange={e => updateTarget('company', e.target.value)} required minLength={2} placeholder="Company name" /></div>}
+                  {mode === 'discover' ? <details className="small-details job-filters"><summary>Refine the search (optional)</summary><div className="form-grid"><Field label="Target role (optional)" value={target.role} onChange={e => updateTarget('role', e.target.value)} placeholder="Use roles from my resume" /><Field label="Preferred company (optional)" value={target.company} onChange={e => updateTarget('company', e.target.value)} placeholder="Any company" /><Field label="Location (optional)" value={target.location} onChange={e => updateTarget('location', e.target.value)} placeholder="City or remote" /><Field label="Job type (optional)" value={target.job_type} onChange={e => updateTarget('job_type', e.target.value)} placeholder="Internship, graduate, full-time…" /></div></details>
                     : <><Field label={mode === 'company' ? 'Job description' : 'Job description (optional)'} multiline rows={8} value={target.job_description} onChange={e => updateTarget('job_description', e.target.value)} required={mode === 'company'} placeholder="Paste the responsibilities, required skills and qualifications from the job listing." hint={mode === 'company' ? 'We compare this description directly with your resume. A company name alone cannot produce a job-specific score.' : 'Leave blank to write a networking introduction without a job match.'} />
                       <div className="job-upload"><Button type="button" secondary onClick={() => jobFileInput.current?.click()}><UploadSimple size={18} />Upload PDF or Word</Button><span>{jobFilename ? `Loaded: ${jobFilename}` : 'PDF or DOCX · Max 5 MB'}</span>
                         <input ref={jobFileInput} type="file" accept=".pdf,.docx" aria-label="Choose job description file" className="file-input" onChange={e => { uploadJob(e.target.files[0]); e.target.value = '' }} /></div>
                       <details className="small-details job-source"><summary>Add a job link (optional)</summary><Field label="Job link (optional)" value={target.job_url} onChange={e => updateTarget('job_url', e.target.value)} type="url" placeholder="https://company.com/careers/…" hint="The description above takes precedence over this link." /></details></>}
                   {mode === 'person' && <div className="recipient-fields"><h4>Your known contact</h4><div className="form-grid"><Field label="Employee name" value={person.name} onChange={e => updatePerson('name', e.target.value)} required placeholder="Full name" /><Field label="Employee role" value={person.role} onChange={e => updatePerson('role', e.target.value)} placeholder="Their job title" /></div><Field label="Professional email" type="email" value={person.email} required onChange={e => updatePerson('email', e.target.value)} placeholder="name@company.com" /></div>}
-                  <div className="form-footer"><Button type="submit"><MagnifyingGlass size={18} />{mode === 'discover' ? 'Find opportunities' : mode === 'person' && !target.job_description.trim() && !target.job_url.trim() ? 'Write my introduction' : 'Get match score'}</Button>
-                    <button type="button" className="text-button" onClick={useSampleJob}>Use a classroom job</button></div>
+                  <div className="form-footer"><Button type="submit"><MagnifyingGlass size={18} />{mode === 'discover' ? 'Search again' : mode === 'person' && !target.job_description.trim() && !target.job_url.trim() ? 'Write my introduction' : 'Get match score'}</Button>
+                    {mode !== 'discover' && <button type="button" className="text-button" onClick={useSampleJob}>Use a classroom job</button>}</div>
                 </fieldset></form>
                 {mode !== 'person' && <div className="section-action"><span>Just looking to connect? You can find people without a job listing.</span><button className="text-button" disabled={!!busy} onClick={() => go(2)}>Go directly to contacts <ArrowRight size={17} /></button></div>}
               </section>
-              {warnings.map((warning, i) => <Notice key={i}>{warning}</Notice>)}
-              {!!opportunities.length && <section className="paper opportunity-paper"><h2>Opportunities to consider</h2><p className="section-description">Ranked using your profile and readable job descriptions.</p>
+              {mode === 'discover' && !!warnings.length ? <details className="paper small-details"><summary>Search notes ({warnings.length})</summary>{warnings.map((warning, i) => <p key={i}>{warning}</p>)}</details> : warnings.map((warning, i) => <Notice key={i}>{warning}</Notice>)}
+              {mode === 'discover' && !opportunities.length && <section className="paper" role="status"><h2>{busy ? 'Finding openings for you…' : 'No readable openings found yet'}</h2><p className="section-description">{busy ? 'Searching public listings and comparing the available descriptions with your resume.' : 'Try Search again or optional filters. You can also paste a description under I know the company, or go directly to Contacts.'}</p></section>}
+              {!!opportunities.length && <section className="paper opportunity-paper"><h2>{opportunities.length} openings to consider</h2><p className="section-description">Ranked by resume fit, not your chance of selection. Review the requirements and confirm the opening before applying.</p>
                 {opportunities.map((item, i) => <article className={`opportunity ${job?.job_url === item.job.job_url && job?.role === item.job.role ? 'chosen' : ''}`} key={item.id || i}>
-                  <div className="company-monogram" aria-hidden="true">{item.job.company.slice(0, 1)}</div><div className="opportunity-info"><h3>{item.job.role}</h3><p>{item.job.company}{item.job.location && ` · ${item.job.location}`}</p><Tags items={item.match.strong_matches.slice(0, 4)} empty="No shared skills identified" />{item.job.job_url && <a href={safeUrl(item.job.job_url)} target="_blank" rel="noreferrer">View listing <ArrowUpRight size={13} /></a>}</div>
-                  <div className="opportunity-score"><strong>{item.match.score == null ? '—' : `${Math.round(item.match.score)}%`}</strong><span>Job-specific match</span><Button secondary disabled={!!busy} onClick={() => chooseJob(item)}>Select job</Button></div>
+                  <div className="company-monogram" aria-hidden="true">{item.job.company.slice(0, 1)}</div><div className="opportunity-info"><h3>{item.job.role}</h3><p>{item.job.company}{item.job.location && ` · ${item.job.location}`}</p><p>{item.job.posted_at ? `${item.job.source.includes('indexed') ? 'Approx. posted' : 'Posted'}: ${item.job.posted_at.slice(0, 10)}` : 'Posting date unconfirmed'} · {item.job.source}</p><Tags items={item.match.strong_matches.slice(0, 4)} empty="No shared skills identified" />{!!item.match.missing_skills.length && <p>Skills to review: {item.match.missing_skills.slice(0, 4).join(', ')}</p>}{item.job.job_url && <a href={safeUrl(item.job.job_url)} target="_blank" rel="noreferrer">Apply on source <ArrowUpRight size={13} /></a>}</div>
+                  <div className="opportunity-score"><strong>{item.match.score == null ? '—' : `${Math.round(item.match.score)}%`}</strong><span>Resume fit</span><Button secondary disabled={!!busy} onClick={() => chooseJob(item)}>View match</Button><button className="text-button" disabled={!!busy} onClick={() => chooseJob(item, true)}>Find contacts <ArrowRight size={15} /></button></div>
                 </article>)}
               </section>}
               {match && job && <div ref={matchPanel} className="job-match-result" tabIndex={-1} aria-label="Job-specific match result"><MatchReport job={job} match={match} nextLabel={mode === 'person' ? 'Write my introduction' : 'Find contacts'} disabled={!!busy} onNext={() => { if (mode === 'person') { if (!targetForm.current.reportValidity()) return; setSelected({ ...person, company: job.company, email_status: 'Unknown', email_source: 'User supplied', warnings: [], email_checks: {}, inferred_emails: [] }); go(3) } else go(2) }} /></div>}

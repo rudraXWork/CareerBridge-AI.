@@ -85,7 +85,7 @@ def test_job_schema_and_supplied_description(monkeypatch, candidate):
     soup = BeautifulSoup('<script type="application/ld+json">' + json.dumps(schema) + '</script>', 'html.parser')
     monkeypatch.setattr('backend.services.job_search.fetch_page', lambda url: (soup, url))
     monkeypatch.setattr('backend.services.job_search.search_web',
-                        lambda *args: [{'url': 'https://example.com/job'}])
+                        lambda *args, **kwargs: [{'url': 'https://example.com/job'}])
     from backend.models import JobSearchRequest
     jobs, warnings = discover_jobs(JobSearchRequest(candidate=candidate, target_role='Data Analyst'))
     assert len(jobs) == 1 and jobs[0].company == 'Demo'
@@ -97,7 +97,7 @@ def test_job_schema_and_supplied_description(monkeypatch, candidate):
 
 def test_empty_discovery_returns_partial_results(monkeypatch, candidate):
     from backend.models import JobSearchRequest
-    monkeypatch.setattr('backend.services.job_search.search_web', lambda *args: [])
+    monkeypatch.setattr('backend.services.job_search.search_web', lambda *args, **kwargs: [])
     jobs, warnings = discover_jobs(JobSearchRequest(candidate=candidate, target_role='Analyst'))
     assert jobs == [] and warnings
 

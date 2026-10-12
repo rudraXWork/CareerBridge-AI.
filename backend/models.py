@@ -63,6 +63,8 @@ class JobInput(Model):
     job_url: str = ''
     job_description: str = Field(default='', max_length=MAX_TEXT)
     source: str = 'User supplied'
+    posted_at: str = ''
+    valid_through: str = ''
 
 
 class JobProfile(JobInput):
@@ -98,7 +100,7 @@ class MatchResult(Model):
 
 class JobSearchRequest(Model):
     candidate: CandidateProfile
-    target_role: str = Field(min_length=2, max_length=150)
+    target_role: str = Field(default='', max_length=150)
     company: str = ''
     location: str = ''
     job_type: str = ''

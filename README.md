@@ -10,7 +10,8 @@ CareerBridge AI helps students and early-career applicants review a resume, comp
 - **Resume health:** separate ATS-readiness and content-quality scores, with evidence and assessment coverage.
 - **AI insights:** up to two specific improvements grounded in project or experience statements.
 - **Job comparison:** paste a description or upload PDF/DOCX, review the text, and calculate a job-specific match.
-- **Flexible outreach:** start with a known company, find opportunities, or use a person you already know.
+- **Jobs for you:** opening Job Match automatically searches using resume skills and likely roles, then shows up to five ranked postings with application links.
+- **Flexible outreach:** compare a known company's description or use a person you already know.
 - **Contact discovery:** public search evidence and local relevance ranking for technical employees, managers, and recruiting staff.
 - **Email discovery:** company-domain lookup, optional Hunter/Apollo enrichment, name-based patterns, and verification status.
 - **Email drafting:** networking, referral, or job-application drafts with four tone choices.
@@ -202,7 +203,7 @@ Vite forwards `/api` requests to port `8000`. Open the Vite URL to use the app. 
 1. **Upload and review a resume.** Health appears before the candidate profile. Correct fields with **Edit details** and optionally generate AI insights.
 2. **Choose a route.**
    - **I know the company:** enter a company, role, and description. Paste text or upload PDF/DOCX, review it, then click **Get match score**.
-   - **Find opportunities:** search public listings, select a job, and inspect its match.
+   - **Jobs for you (default):** recent jobs are searched automatically without company details. Review the five highest matches, open **Apply on source**, or choose **Find contacts**. Role, company, location, and job-type filters are optional.
    - **I know the person:** supply a contact and email; a job description is optional.
    - **Contacts directly:** search a company for networking or referrals without a listing or match.
 3. **Review contacts.** A selected job carries its company and role into discovery. Source evidence and relevance scores are shown.
@@ -210,6 +211,8 @@ Vite forwards `/api` requests to port `8000`. Open the Vite URL to use the app. 
 5. **Generate a draft.** Choose a tone and purpose, review the subject/body, and copy it into your email application.
 
 Classroom samples contain fictional data. AI insights suggest changes and do not edit the resume automatically. PDF export creates a new document from the reviewed profile.
+
+Job discovery uses up to three Tavily advanced searches across individual LinkedIn and supported job-board postings, with a one-month search filter. It reads available JobPosting metadata or public job-page fields. For LinkedIn, it uses substantive indexed descriptions if the title and employer are supported by that text, avoiding repeated requests to blocked pages. Indexed results are labelled **opening unconfirmed**, and dates inferred from relative posting ages are approximate. Known expired listings and known dates outside the recent window are excluded from automatic discovery. Search coverage can be incomplete; fewer than five usable results are shown honestly. Tavily searches use provider credits. Only role/skill/filter terms are sent in the search query, not the candidate's name, email, or full resume.
 
 ## Scoring and interpretation
 
@@ -258,7 +261,7 @@ node --test frontend/src/projects.test.js frontend/src/insights.test.js
 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python evaluate.py
 ```
 
-The latest local check passed **140 Python tests and 10 frontend helper tests**. External providers are mocked in tests. Model-dependent tests require downloaded MiniLM files.
+The latest local check passed **151 Python tests and 10 frontend helper tests**. External providers are mocked in tests. Model-dependent tests require downloaded MiniLM files.
 
 `evaluation/results.json` contains eight labelled skill examples and three fictional job comparisons. Saved high/medium/low matches scored **87.02%, 53.01%, and 10.39%**. These classroom examples are not a broad benchmark or hiring prediction.
 

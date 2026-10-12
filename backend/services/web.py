@@ -31,14 +31,21 @@ def request_json(method, url, provider, **kwargs):
         raise ServiceError(f'{provider} could not return a valid response. Try again later.') from exc
 
 
-def search_web(query, limit=5):
+def search_web(query, limit=5, *, time_range=None, job_search=False):
     key = api_key('TAVILY_API_KEY')
     if not key:
         raise ServiceError('Add TAVILY_API_KEY for live discovery, or provide a job description/person directly.')
+    params = {'query': query, 'max_results': limit, 'search_depth': 'basic',
+              'include_answer': False, 'include_raw_content': False}
+    if time_range:
+        params['time_range'] = time_range
+    if job_search:
+        params.update(search_depth='advanced', include_raw_content='text',
+                      include_domains=['linkedin.com/jobs/view', 'jobs.lever.co', 'job-boards.greenhouse.io',
+                                       'boards.greenhouse.io', 'jobs.ashbyhq.com'])
     data = request_json('POST', 'https://api.tavily.com/search', 'Tavily',
                         headers={'Authorization': f'Bearer {key}'},
-                        json={'query': query, 'max_results': limit, 'search_depth': 'basic',
-                              'include_answer': False, 'include_raw_content': False})
+                        json=params)
     return data.get('results', [])
 
 
